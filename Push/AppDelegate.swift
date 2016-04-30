@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 
         
         //registra uma ação
-        var acceptAction = UIMutableUserNotificationAction()
+        let acceptAction = UIMutableUserNotificationAction()
         acceptAction.identifier="ACCEPT_IDENTIFIER"
         acceptAction.title="ACCEPT"
         acceptAction.activationMode = UIUserNotificationActivationMode.Background
@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         acceptAction.authenticationRequired = false
         
         //registra uma ação
-        var declineAction = UIMutableUserNotificationAction()
+        let declineAction = UIMutableUserNotificationAction()
         declineAction.identifier="DECLINE_IDENTIFIER"
         declineAction.title="DECLINE"
         declineAction.activationMode = UIUserNotificationActivationMode.Background
@@ -39,22 +39,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         declineAction.authenticationRequired = false
         
         //registra uma categoria
-        var inviteCategory = UIMutableUserNotificationCategory()
+        let inviteCategory = UIMutableUserNotificationCategory()
         inviteCategory.identifier="INVITE_CATEGORY"
         inviteCategory.setActions([acceptAction,declineAction], forContext: UIUserNotificationActionContext.Default)
         inviteCategory.setActions([acceptAction,declineAction], forContext: UIUserNotificationActionContext.Minimal)
         
-        var cat = NSMutableSet()
-        cat.addObject(inviteCategory)
+        var cat = Set<UIUserNotificationCategory>()
+        cat.insert(inviteCategory)
 
         //cria as configurações das notificações dessa aplicação
-        let notificationTypes:UIUserNotificationType = UIUserNotificationType.Alert | UIUserNotificationType.Badge | UIUserNotificationType.Sound
+        let notificationTypes:UIUserNotificationType = [.Alert, .Badge, .Sound]
         let notificationSettings:UIUserNotificationSettings = UIUserNotificationSettings(forTypes: notificationTypes, categories: cat)
         
         //chama o método para escalonamento da notificação local.
         //scheduleLocalNotif()
         
-        var locMan = CLLocationManager()
+        let locMan = CLLocationManager()
         locMan.delegate = self //deve conformar com CLLocationManagerDelegate
         locMan.requestWhenInUseAuthorization()
         
@@ -67,14 +67,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
 
 
-    func locationManager(manager: CLLocationManager!, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
         if(status == CLAuthorizationStatus.AuthorizedWhenInUse) {
             startShowingLocationNotifications()
         }
     }
     
     func startShowingLocationNotifications(){
-        var localNotif = UILocalNotification()
+        let localNotif = UILocalNotification()
         localNotif.alertBody="Chegou!"
         localNotif.regionTriggersOnce = true
 
@@ -90,9 +90,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
     
     func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
-        var region = notification.region
+        let region = notification.region
         if((region) != nil){
-            println("Voce chegou no lugar!")
+            print("Voce chegou no lugar!")
         }
     }
     
@@ -101,9 +101,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func application(application: UIApplication, handleActionWithIdentifier identifier: String?, forLocalNotification notification: UILocalNotification, completionHandler: () -> Void) {
         
         if (identifier == "ACCEPT_IDENTIFIER"){
-            println("Aceitar!")
+            print("Aceitar!")
         }else{
-            println("Declinar!")
+            print("Declinar!")
         }
         
         //tem que chamar o completion no final
@@ -113,7 +113,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     
     //função que cria uma notificação local
     func scheduleLocalNotif(){
-        var localNotif = UILocalNotification()
+        let localNotif = UILocalNotification()
         localNotif.alertBody="Teste de notificação"
         localNotif.alertAction = "Titulo informativo"
         localNotif.soundName = UILocalNotificationDefaultSoundName
@@ -128,34 +128,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     /*função utilizadas para notificações remotas*/
     //função necessária para registro de notificações remotas
     func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
-        var allowedTypes = notificationSettings.types
         UIApplication.sharedApplication().registerForRemoteNotifications()
 
     }
     
     //função chamada em caso de sucesso no registro do token remoto
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-        println("Got Token! My token is ",deviceToken)
+        print("Got Token! My token is ",deviceToken)
         
-        var currentInstallation = PFInstallation.currentInstallation()
+        let currentInstallation = PFInstallation.currentInstallation()
         currentInstallation.setDeviceTokenFromData(deviceToken)
         currentInstallation.saveInBackground()
     }
     
     //função chamada em caso de falha no registro do token remoto
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
-        println("Failed to get token ",error)
+        print("Failed to get token ",error)
     }
     
     //função chamada em caso de recebimento de uma notificação remota de usuário
-    func application(application: UIApplication!, didReceiveRemoteNotification userInfo:NSDictionary!) {
-        
-        println("Got push notif!")
+    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+        print("Got push notif!")
     }
     
     //função chamada em caso de recebimento de uma notificação remota silenciosa
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
-        println("Got silent notif")
+        print("Got silent notif")
         
         completionHandler(UIBackgroundFetchResult.NewData)
     }
